@@ -9,10 +9,12 @@ class Settings(BaseSettings):
     # --- Reddit API ---
     reddit_client_id: str = ""
     reddit_client_secret: str = ""
-    reddit_user_agent: str = "espulse/0.1"
+    reddit_user_agent: str = ""
 
     # --- Google Search Console ---
     google_search_console_credentials_path: str = ""
+
+    gemini_api_key: str = ""
 
     # --- App ---
     environment: str = "development"

@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:14
+    container_name: espulse-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: espulse
+      POSTGRES_USER: espulse
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U espulse -d espulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
