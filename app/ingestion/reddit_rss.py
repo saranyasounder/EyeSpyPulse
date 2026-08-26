@@ -1,12 +1,13 @@
-import feedparser
+import time
 from datetime import datetime, timezone
+
+import feedparser
 from sqlalchemy.exc import IntegrityError
 
 from app.db.session import SessionLocal
 from app.models.raw_record import RawRecord, SourceType
 from app.config import settings
 
-import time
 FEED_URLS = [
     "https://www.reddit.com/r/Blind/new/.rss",
 ]
@@ -23,8 +24,10 @@ def fetch_feed(url: str, max_retries: int = 3):
 
         if status == 429:
             wait_seconds = 30 * attempt  # 30s, 60s, 90s
-            print(f"Rate limited (429) on {url}. Retrying in {wait_seconds}s "
-                  f"(attempt {attempt}/{max_retries})...")
+            print(
+                f"Rate limited (429) on {url}. Retrying in {wait_seconds}s "
+                f"(attempt {attempt}/{max_retries})..."
+            )
             time.sleep(wait_seconds)
             continue
 
@@ -70,20 +73,37 @@ def run_ingestion():
     try:
         for url in FEED_URLS:
             entries = fetch_feed(url)
+            print(f"Fetched {len(entries)} entries from {url}")
+
             for entry in entries:
                 record = entry_to_raw_record(entry)
-                db.add(record)
+
                 try:
+                    db.add(record)
                     db.commit()
                     inserted += 1
-                except IntegrityError:
-                    # source_id already exists — duplicate, skip it
+                except IntegrityError as e:
                     db.rollback()
+                    # e.orig has the real Postgres error text —
+                    # this tells us whether it's truly a duplicate
+                    # key violation or something else entirely
+                    print(f"IntegrityError on {record.source_id}: {e.orig}")
+                    skipped += 1
+                except Exception as e:
+                    db.rollback()
+                    print(
+                        f"UNEXPECTED error on {record.source_id}: "
+                        f"{type(e).__name__}: {e}"
+                    )
+                    # don't re-raise here — one bad row shouldn't kill
+                    # the whole batch; just skip it and move on
                     skipped += 1
     finally:
         db.close()
 
-    print(f"Ingestion complete: {inserted} inserted, {skipped} duplicates skipped")
+    print(
+        f"Ingestion complete: {inserted} inserted, {skipped} duplicates/errors skipped"
+    )
 
 
 if __name__ == "__main__":
