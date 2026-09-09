@@ -6,3 +6,11 @@ alembic
 python-dotenv
 pydantic-settings
 feedparser
+uvicorn
+presidio-analyzer
+presidio-anonymizer
+spacy
+
+sentence-transformers
+hdbscan
+scikit-learn

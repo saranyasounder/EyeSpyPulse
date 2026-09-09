@@ -14,6 +14,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from app.config import settings
 from app.db.session import Base
 from app.models.raw_record import RawRecord  # noqa: F401 — must import so Base sees it
+from app.models.masked_record import MaskedRecord  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
