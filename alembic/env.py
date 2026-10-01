@@ -4,6 +4,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from app.models.topic import TopicAssignment  # noqa: F401
+from app.models.sentiment_score import SentimentScore  # noqa: F401
+from app.models.topic_daily_stat import TopicDailyStat  # noqa: F401
 
 import sys
 from pathlib import Path

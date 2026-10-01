@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # --- Google Search Console ---
     google_search_console_credentials_path: str = ""
+    raw_retention_days: int = 7
 
     gemini_api_key: str = ""
 
